@@ -3,6 +3,7 @@ package jpabook.jpashop.domain.item;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 @Embeddable
 @Getter
