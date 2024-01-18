@@ -17,7 +17,7 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
-    private String username;
+    private String name;
 
     @Embedded // Address 클래스의 필드가 소유 엔터티 Member의 테이블 내에 삽입됨
     private Address address;
