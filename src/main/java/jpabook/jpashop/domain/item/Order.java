@@ -1,7 +1,9 @@
 package jpabook.jpashop.domain.item;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Getter
 @Setter
 @Table(name = "orders")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
     @Id
@@ -33,6 +36,7 @@ public class Order {
     private Delivery delivery;
 
     private LocalDateTime orderDate;
+
     @Enumerated(EnumType.STRING) // EnumType.ORDINAL을 사용하지 않는 이유는 상태가 추가될 수 있기 때문 ORDINAL은 0, 1과 같이 두가지만을 가진다.
     private OrderStaus staus; // 주문상태 (order, cancel)
 
@@ -51,7 +55,58 @@ public class Order {
         this.delivery = delivery;
         delivery.setOrder(this);
     }
+
+    // 비지니스 로직 대부분이 엔터티에 있고 서비스 계층은 단순히 엔터티에 필요한 요청을 위임하는 역할을 한다.
+    // --> 도메인 모델 패턴
+
+    //==생성 메서드==//
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for (OrderItem orderItem : orderItems) {
+            order.addOrderItem(orderItem);
+        }
+        order.setStaus(OrderStaus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
+
+    //==비지니스 로직==//
+
+    /**
+     * 주문 취소
+     */
+    public void cancel() {
+        if (delivery.getStatus() == DeliveryStatus.COMP) {
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
+        }
+
+        this.setStaus(OrderStaus.CANCEL);
+        for (OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
+
+    //==조회 로직==//
+
+    /**
+     * 전체 주문 가격 조회
+     */
+    public int getTotalPrice() {
+        int totalPrice = 0;
+        for (OrderItem orderItem : orderItems) {
+            totalPrice += orderItem.getTotalPrice();
+        }
+        return totalPrice;
+    }
 }
+
+//    for문에 커서 두고 alt + enter 혹은 전구 누르면 stream으로 자동 바꿔줌
+//    public int getTotalPrice() {
+//        return orderItems.stream().mapToInt(OrderItem::getTotalPrice).sum();
+//    }
+
 
 //    public static void main(String[] args) {
 //        Member member = new Member();
@@ -60,5 +115,7 @@ public class Order {
 //        member.getOrders().add(order);
 //        order.setMember(member);
 //    }
+
+
 
 
