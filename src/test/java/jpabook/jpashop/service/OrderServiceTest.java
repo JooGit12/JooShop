@@ -51,10 +51,19 @@ class OrderServiceTest {
     @Test
     public void 주문취소() throws Exception {
         // given
+        Member member = createMember();
+        Book item = createBook("드래곤볼", 10000, 10);
+        int orderCount = 2;
+        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
 
         // when
+        orderService.cancelOrder(orderId);
 
         // then
+        Order getOrder = orderRepository.findOne(orderId);
+
+        Assertions.assertEquals(getOrder.getStaus(), OrderStaus.CANCEL, "주문이 취소된 상품은 재고가 증가해야 한다.");
+        Assertions.assertEquals(10, item.getStockQuantity(), "주문이 취소된 상품은 그만큼 재고가 증가해야 한다.");
     }
 
     @Test
@@ -63,13 +72,13 @@ class OrderServiceTest {
         Member member = createMember();
         Item item = createBook("드래곤볼", 10000, 10);
 
-        int orderCount = 11;
+        int orderCount = 10;
         // when
         Assertions.assertThrows(NotEnoughStockException.class, () -> {
             orderService.order(member.getId(), item.getId(), orderCount);
         });
         // then
-        //Assertions.fail("재고 수량 부족 예외 발생");
+        Assertions.fail("재고 수량 부족 예외 발생");
     }
 
     private Book createBook(String name, int price, int stockQuantity) { // --> 단축키 : ctrl + alt + m + m
