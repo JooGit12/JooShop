@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:oracle:thin:@localhost:1521:xe
-    username: system
-    password: oracle
+    username: joo
+    password: joo
     driver-class-name: oracle.jdbc.driver.OracleDriver
 
   jpa:
@@ -18,3 +18,5 @@ logging:
   level:
     org.hibernate.sql: debug
     org.hibernate.type: trace
+
+

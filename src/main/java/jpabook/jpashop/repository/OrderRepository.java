@@ -15,9 +15,11 @@ import java.util.List;
 public class OrderRepository {
 
     private final EntityManager em;
+
     public OrderRepository(EntityManager em) {
         this.em = em;
     }
+
     public void save(Order order) {
         em.persist(order);
     }
@@ -31,8 +33,8 @@ public class OrderRepository {
         String jpql = "select o from Order o join o.member m";
         boolean isFirstCondition = true;
 
-        // 주문 상태 검색
-        if (orderSearch.getOrderStaus() != null) {
+        //주문 상태 검색
+        if (orderSearch.getOrderStatus() != null) {
             if (isFirstCondition) {
                 jpql += " where";
                 isFirstCondition = false;
@@ -42,23 +44,22 @@ public class OrderRepository {
             jpql += " o.status = :status";
         }
 
-        // 회원 이름 검색
-        if(StringUtils.hasText(orderSearch.getMemberName())) {
+        //회원 이름 검색
+        if (StringUtils.hasText(orderSearch.getMemberName())) {
             if (isFirstCondition) {
                 jpql += " where";
                 isFirstCondition = false;
             } else {
                 jpql += " and";
             }
-            jpql += "m.name like :name";
+            jpql += " m.name like :name";
         }
 
-
         TypedQuery<Order> query = em.createQuery(jpql, Order.class)
-                .setMaxResults(1000);// 최대 1000건
+                .setMaxResults(1000);
 
-        if (orderSearch.getOrderStaus() != null) {
-            query = query.setParameter("status", orderSearch.getOrderStaus());
+        if (orderSearch.getOrderStatus() != null) {
+            query = query.setParameter("status", orderSearch.getOrderStatus());
         }
         if (StringUtils.hasText(orderSearch.getMemberName())) {
             query = query.setParameter("name", orderSearch.getMemberName());
@@ -68,9 +69,7 @@ public class OrderRepository {
     }
 
     /**
-     * JPA Criteria (JPA 표준 스펙)
-     * 단점 유지보수에 메리트가 없음.
-     * 보기에 복잡해서 실무에서 쓰기가 힘들다.
+     * JPA Criteria
      */
     public List<Order> findAllByCriteria(OrderSearch orderSearch) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -79,25 +78,22 @@ public class OrderRepository {
         Join<Object, Object> m = o.join("member", JoinType.INNER);
 
         List<Predicate> criteria = new ArrayList<>();
-        
-        // 주문 상태 검색
-        if (orderSearch.getOrderStaus() != null) {
-            Predicate status = cb.equal(o.get("status"), orderSearch.getOrderStaus());
+
+        //주문 상태 검색
+        if (orderSearch.getOrderStatus() != null) {
+            Predicate status = cb.equal(o.get("status"), orderSearch.getOrderStatus());
             criteria.add(status);
         }
-        
-        // 회원 이름 검색
+        //회원 이름 검색
         if (StringUtils.hasText(orderSearch.getMemberName())) {
             Predicate name =
                     cb.like(m.<String>get("name"), "%" + orderSearch.getMemberName() + "%");
-                    criteria.add(name);
+            criteria.add(name);
         }
 
         cq.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
         TypedQuery<Order> query = em.createQuery(cq).setMaxResults(1000);
         return query.getResultList();
     }
-
-
 
 }

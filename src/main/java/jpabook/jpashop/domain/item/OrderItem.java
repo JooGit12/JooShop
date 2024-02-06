@@ -60,4 +60,7 @@ public class OrderItem {
     public int getTotalPrice() { // 주문 가격과 수량이 있기 때문에
         return getOrderPrice() * getCount();
     }
+
 }
+
+
