@@ -13,9 +13,8 @@ import java.util.List;
 import static jakarta.persistence.FetchType.LAZY;
 
 @Entity
-@Getter
-@Setter
 @Table(name = "orders")
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
@@ -38,7 +37,7 @@ public class Order {
     private LocalDateTime orderDate;
 
     @Enumerated(EnumType.STRING) // EnumType.ORDINAL을 사용하지 않는 이유는 상태가 추가될 수 있기 때문 ORDINAL은 0, 1과 같이 두가지만을 가진다.
-    private OrderStaus staus; // 주문상태 (order, cancel)
+    private OrderStatus status; // 주문상태 (order, cancel)
 
     // == 연관관계 편의 메서드== //
     public void setMember(Member member) {
@@ -67,7 +66,7 @@ public class Order {
         for (OrderItem orderItem : orderItems) {
             order.addOrderItem(orderItem);
         }
-        order.setStaus(OrderStaus.ORDER);
+        order.setStatus(OrderStatus.ORDER);
         order.setOrderDate(LocalDateTime.now());
         return order;
     }
@@ -82,7 +81,7 @@ public class Order {
             throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
         }
 
-        this.setStaus(OrderStaus.CANCEL);
+        this.setStatus(OrderStatus.CANCEL);
         for (OrderItem orderItem : orderItems) {
             orderItem.cancel();
         }
