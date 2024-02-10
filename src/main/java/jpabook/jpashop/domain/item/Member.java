@@ -1,6 +1,8 @@
 package jpabook.jpashop.domain.item;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,11 +19,13 @@ public class Member {
     @Column(name = "member_id")
     private Long id;
 
+    // @NotEmpty : @NotEmpty와 같은 validchecking은 엔티티가 아닌 DTO딴에서 설정하면 유연하게 사용할 수 있다.
     private String name;
 
     @Embedded // Address 클래스의 필드가 소유 엔터티 Member의 테이블 내에 삽입됨
     private Address address;
 
+    // @JsonIgnore
     @OneToMany(mappedBy = "member")
     private List<Order> orders = new ArrayList<>(); // 컬렉션은 필드에서 바로 초기화하는것이 안전하다
                                                     // null문제에서 안전하다.
